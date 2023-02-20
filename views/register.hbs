@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<!-- author: Jim Han (179381215) -->
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEB322 Assignment Register Gallery</title>
+
+    <style>
+        
+    </style>
+</head>
+
+<body>
+    <form method="post" action="/register">
+
+		<h1>Favorite Series</h1>
+
+		<div class="clsregistercontent">
+			<h3>Account Registration</h3>
+			<br />
+			<input id="txtUserName" name="txtUserName" type="email" placeholder="Email" value="" />
+			<br />
+			<input id="txtPassword" name="txtPassword" type="password" placeholder="Password" value="" />
+			<br />
+			<input id="txtConfirmPassword" name="txtConfirmPassword" type="password" placeholder="Confirm Password" value="" />
+			<br />
+			<button id="btnRegister" type="submit" value="submit">Register</button>
+			<br />
+			<label id="lblMessage">{{ message }}</label>
+		</div>
+
+	</form>
+</body>
+
+</html>

@@ -36,7 +36,7 @@
             width: 15%;
         }
 
-        .clsImageName{
+        .clsImageName {
             border: none;
             height: 6vh;
             width: 65vh;
@@ -47,6 +47,12 @@
             position: absolute;
             text-align: center;
             top: 72vh;
+        }
+
+        .clsLogout {
+            position: absolute;
+            top: 10vh;
+            right: 10vh;
         }
     </style>
 </head>
@@ -80,6 +86,11 @@
         {{else}}
         Home
         {{/if}}
+    </div>
+
+    <div class="clsLogout">
+        <div id="divUsername">{{username}}</div>
+        <div id="divLogout"><a id="aLogout" href="/logout">Logout</a></div>
     </div>
 </body>
 

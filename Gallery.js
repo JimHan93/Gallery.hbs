@@ -23,6 +23,16 @@ app.use(
   })
 );
 
+app.use(function(req, res, next) {
+  if (!req.GallerySession) {
+    req.GallerySession = { loggedIn: false };
+  }
+  if (!req.GallerySession.txtUsername) {
+    req.GallerySession.txtUsername = null;
+  }
+  next();
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/images", express.static(path.join(__dirname, "/public/images")));
@@ -57,11 +67,53 @@ app.post('/', (req, res) => {
         res.render('login', { message: 'Invalid password' });
       } else {
         req.GallerySession.loggedIn = true;
+        req.GallerySession.txtUsername = txtUsername;
         res.redirect('/gallery');
       }
     }
   });
 });
+
+app.get("/register", (req, res) => {
+  res.render('register');
+});
+
+app.post('/register', (req, res) => {
+  const txtUserName = req.body.txtUserName;
+  const txtPassword = req.body.txtPassword;
+  const txtConfirmPassword = req.body.txtConfirmPassword;
+
+  if (txtPassword !== txtConfirmPassword){
+    return res.render('register', {message: 'Passwords do not match'});
+  }
+
+  fs.readFile('./user.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Internal Server Error');
+    } else {
+      const users = JSON.parse(data);
+
+      if (users.hasOwnProperty(txtUserName)) {
+        res.render('register', { message: 'Username already exists' });
+      } else {
+        users[txtUserName] = txtPassword;
+
+        fs.writeFile('./user.json', JSON.stringify(users), (err) => {
+          if (err) {
+            console.error(err);
+            res.status(500).send('Internal Server Error');
+          } else {
+            req.GallerySession.loggedIn = true;
+            res.redirect('/gallery');
+          }
+        });
+      }
+    }
+  });
+});
+
+
 
 const rl = readline("./images.txt");
 var image = [];
@@ -74,9 +126,8 @@ rl.on("line", (line, lineCount, byteCount) => {
 });
 
 app.get("/gallery", function(req, res){
-  console.log(req.GallerySession);
   if (req.GallerySession.loggedIn){
-    res.render('gallery', {image});
+    res.render('gallery', {image: image, username: req.GallerySession.txtUsername});
   }else {
     res.redirect('/');
   }
@@ -90,6 +141,11 @@ app.post("/gallery", function(req, res) {
   }
   res.render("gallery", { selected, image });
 });
+
+app.get("/logout", function(req, res) {
+  req.GallerySession.loggedIn = false;
+  res.redirect("/");
+})
 
 const server = app.listen(HTTP_PORT, () => {
   console.log(`Listening on port ${HTTP_PORT}`);
