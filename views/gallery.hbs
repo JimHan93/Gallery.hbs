@@ -53,6 +53,38 @@
             position: absolute;
             top: 10vh;
             right: 10vh;
+            text-align: left;
+            width: 200px;
+        }
+
+        #divUsername{
+            color: rgb(88, 129, 204);
+            left: 0;
+            opacity: 1;
+            position: absolute;
+            top: 0;
+            transition: opacity 1s ease-out;
+        }
+
+        #divLogout{
+            left: 0;
+            position: absolute;
+            top: 0;
+        }
+
+        #aLogout{
+            color: rgb(67, 204, 67);
+            opacity: 0;
+            text-decoration: underline;
+            transition: opacity 1s ease-in;
+        }
+
+        .clsLogout:hover #divUsername{
+            opacity: 0;
+        }
+
+        .clsLogout:hover #aLogout{
+            opacity: 1;
         }
     </style>
 </head>

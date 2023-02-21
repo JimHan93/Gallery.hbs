@@ -139,7 +139,7 @@ app.post("/gallery", function(req, res) {
     res.redirect('/');
     return;
   }
-  res.render("gallery", { selected, image });
+  res.render("gallery", { selected, image, username: req.GallerySession.txtUsername });
 });
 
 app.get("/logout", function(req, res) {
