@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+
+<!-- author: Jim Han (179381215) -->
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEB322 Assignment Gallery Purchase</title>
+
+    <style>
+        header {
+            margin-top: 2vh;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: large;
+            font-weight: bold;
+        }
+
+        img {
+            height: 200px;
+            width: 200px;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            position: absolute;
+        }
+
+        .clsDescription{
+            margin-top: 30vh;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: large;
+            font-weight: bold;
+        }
+
+        #buy{
+            position: absolute;
+            height: 40px;
+            width: 90px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: large;
+            font-weight: bold;
+            background-color: rgb(6, 146, 6);
+            left: 0;
+            right: 15vh;
+            margin: 0 auto;
+            color:white;
+        }
+
+        #cancel{
+            position: absolute;
+            height: 40px;
+            width: 90px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: large;
+            font-weight: bold;
+            background-color: rgb(6, 146, 6);
+            left: 15vh;
+            right: 0;
+            margin: 0 auto;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <form method="post" action="/purchase">
+    <input type="hidden" name="selected" value="{{selected}}">
+    {{>header}}
+    <br />
+    <div class="clsContent">
+        <img src="/images/{{selected}}.jpg" alt="No Image" />
+    </div>
+    <br />
+    <div class="clsDescription">
+        {{selected}}<br />
+        {{ description }}<br />
+        ${{ price }} <br />
+    </div>
+    <br />
+    <button type="submit" id="buy" onclick="sold()">Buy</button>
+    </form>
+    <button id="cancel" onclick="cancel('{{selected}}')">Cancel</button> 
+    
+    <script>
+        function cancel(selected) {
+            alert("MAYBE NEXT TIME");
+            window.location.href = "/gallery?selected=" + selected;
+        }
+
+        function sold(){
+            alert("SOLD");
+        }
+    </script>
+
+</body>
+
+</html>

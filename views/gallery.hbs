@@ -10,9 +10,12 @@
     <title>Gallery Assignment by Jim Han</title>
 
     <style>
-        h1 {
+        header {
             margin-top: 2vh;
             text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: large;
+            font-weight: bold;
         }
 
         img {
@@ -24,6 +27,14 @@
             position: absolute;
         }
 
+        button {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: large;
+            font-weight: bold;
+            color: white;
+            background-color: rgb(1, 162, 1);
+        }
+
         .clsSelection {
             border: none;
             color: #000000;
@@ -32,8 +43,16 @@
             margin: 0;
             position: absolute;
             text-align: left;
+            font-weight: bold;
+            font-family: 'Courier New', Courier, monospace;
+            font-size:large;
             top: 10vh;
             width: 15%;
+        }
+
+        #imgSelect{
+            background-color: rgb(158, 154, 154);
+            font-weight: bold;
         }
 
         .clsImageName {
@@ -47,14 +66,20 @@
             position: absolute;
             text-align: center;
             top: 72vh;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: large;
+            font-weight: bold;
         }
 
         .clsLogout {
             position: absolute;
             top: 10vh;
-            right: 10vh;
+            right: 20vh;
             text-align: left;
             width: 200px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: large;
+            font-weight: bold;
         }
 
         #divUsername{
@@ -91,22 +116,24 @@
 
 <body>
     <form method="post" action="/gallery">
-        <h1>Favorite Series</h1>
+        {{>header}}
 
         <div class="clsSelection">
-            {{#each image}}
-            <input type="radio" name="rdoImage" id="rdoImage{{.}}" value="{{.}}"><label
-                for="rdoImage{{.}}">{{.}}</label><br>
-            {{/each}}
-            <br>
-            <br>
+            <label for="imgSelect">Select A Poster</label>
+            <select id="imgSelect" name="imgSelect">
+                <option value=""></option>
+                {{#each image}}
+                <option value="{{.}}" >{{.}}</option>
+                {{/each}}
+            </select>
+            <br/>
             <button type="submit" value="submit">Submit</button>
         </div>
     </form>
 
     <div class="clsContent">
         {{#if selected}}
-        <img src="/images/{{selected}}.jpg" alt="No Image" />
+        <img src="/images/{{selected}}.jpg" alt="No Image" onclick="redirectToPurchase('{{selected}}')"/>
         {{else}}
         <img src="/images/home.jpg" alt="No Image" />
         {{/if}}
@@ -124,6 +151,12 @@
         <div id="divUsername">{{username}}</div>
         <div id="divLogout"><a id="aLogout" href="/logout">Logout</a></div>
     </div>
+
+    <script>
+        function redirectToPurchase(selected){
+            window.location.href = '/purchase?selected=' + selected;
+        }
+    </script>
 </body>
 
 </html>

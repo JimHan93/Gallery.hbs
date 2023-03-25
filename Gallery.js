@@ -2,12 +2,15 @@ const HTTP_PORT = process.env.PORT || 3000;
 
 const express = require("express");
 const exphbs = require("express-handlebars");
-const readline = require("linebyline");
 const path = require("path");
 const fs = require("fs");
 const session = require("client-sessions");
 const randomStr = require("randomstring");
+const MongoClient = require("mongodb").MongoClient;
 const app = express();
+const uri = "mongodb+srv://jimhan93:did1203516@jimhanmongodb.jpk4ogk.mongodb.net/?retryWrites=true&w=majority";
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+const pRouter = require("./routes/Purchase.js");
 
 var strRandom = randomStr.generate();
 
@@ -15,7 +18,7 @@ app.use(
   session({
     cookieName: "GallerySession",
     secret: strRandom,
-    duration: 30 * 60* 1000,
+    duration: 30 * 60 * 1000,
     activeDuration: 5 * 60 * 1000,
     httpOnly: true,
     secure: true,
@@ -23,7 +26,23 @@ app.use(
   })
 );
 
-app.use(function(req, res, next) {
+async function connectToDB() {
+  try {
+    await client.connect();
+    console.log("Connected to database");
+  } catch (err) {
+    console.log(err);
+    process.exit(1);
+  }
+}
+
+connectToDB();
+
+const images = client.db('gallerydb').collection('Gallery Collection');
+
+app.use("/purchase", pRouter(images));
+
+app.use(function (req, res, next) {
   if (!req.GallerySession) {
     req.GallerySession = { loggedIn: false };
   }
@@ -32,6 +51,7 @@ app.use(function(req, res, next) {
   }
   next();
 });
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -83,8 +103,8 @@ app.post('/register', (req, res) => {
   const txtPassword = req.body.txtPassword;
   const txtConfirmPassword = req.body.txtConfirmPassword;
 
-  if (txtPassword !== txtConfirmPassword){
-    return res.render('register', {message: 'Passwords do not match'});
+  if (txtPassword !== txtConfirmPassword) {
+    return res.render('register', { message: 'Passwords do not match' });
   }
 
   fs.readFile('./user.json', 'utf8', (err, data) => {
@@ -115,34 +135,48 @@ app.post('/register', (req, res) => {
 
 
 
-const rl = readline("./images.txt");
-var image = [];
-rl.on("line", (line, lineCount, byteCount) => {
-  image.push(path.parse(line).name);
-})
+app.get("/gallery", async function (req, res) {
+  if (req.GallerySession.loggedIn) {
+    const cursor = images.find({ STATUS: "A" }, { projection: { _id: 0, FILENAME: 1 } });
+    const selected = req.query.selected;
+    const image = [];
 
-.on("error", (err) => {
-  console.error(err);
-});
-
-app.get("/gallery", function(req, res){
-  if (req.GallerySession.loggedIn){
-    res.render('gallery', {image: image, username: req.GallerySession.txtUsername});
-  }else {
+    try {
+      const docs = await cursor.toArray();
+      docs.forEach((doc) => {
+        image.push(path.parse(doc.FILENAME).name);
+      });
+      
+      res.render('gallery', { image: image, username: req.GallerySession.txtUsername, selected: selected });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Internal server error");
+    }
+  } else {
     res.redirect('/');
   }
 });
 
-app.post("/gallery", function(req, res) {
-  var selected = req.body.rdoImage;
+app.post("/gallery", async function (req, res) {
   if (!req.GallerySession.loggedIn) {
     res.redirect('/');
     return;
   }
-  res.render("gallery", { selected, image, username: req.GallerySession.txtUsername });
-});
+  const selected = req.body.imgSelect;
+  try {
+    const cursor = images.find({ STATUS: "A" }, { projection: { _id: 0, FILENAME: 1 } });
+    const image = [];
+    await cursor.forEach((doc) => {
+      image.push(path.parse(doc.FILENAME).name);
+    })
+    res.render("gallery", { selected, image, username: req.GallerySession.txtUsername });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+})
 
-app.get("/logout", function(req, res) {
+app.get("/logout", function (req, res) {
   req.GallerySession.loggedIn = false;
   res.redirect("/");
 })
