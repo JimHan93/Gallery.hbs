@@ -70,28 +70,40 @@ app.get("/", (req, res) => {
   res.render('login');
 });
 
-app.post('/', (req, res) => {
+app.post('/', async (req, res) => {
   const txtUsername = req.body.txtUsername;
   const txtPassword = req.body.txtPassword;
 
-  fs.readFile('./user.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Internal Server Error');
-    } else {
-      const users = JSON.parse(data);
+  const readUserFile = () => {
+    return new Promise((resolve, reject) => {
+      fs.readFile('./user.json', 'utf8', (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+  };
 
-      if (!users.hasOwnProperty(txtUsername)) {
-        res.render('login', { message: 'Not a registered username' });
-      } else if (users[txtUsername] !== txtPassword) {
-        res.render('login', { message: 'Invalid password' });
-      } else {
-        req.GallerySession.loggedIn = true;
-        req.GallerySession.txtUsername = txtUsername;
-        res.redirect('/gallery');
-      }
+  try {
+    const data = await readUserFile();
+    const users = JSON.parse(data);
+
+    if (!users.hasOwnProperty(txtUsername)) {
+      res.render('login', { message: 'Not a registered username' });
+    } else if (users[txtUsername] !== txtPassword) {
+      res.render('login', { message: 'Invalid password' });
+    } else {
+      req.GallerySession.loggedIn = true;
+      req.GallerySession.txtUsername = txtUsername;
+      await images.updateMany({}, { $set: { STATUS: "A" } });
+      res.redirect('/gallery');
     }
-  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 app.get("/register", (req, res) => {
